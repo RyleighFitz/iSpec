@@ -23,22 +23,22 @@ from scipy.fftpack import fft
 from scipy.fftpack import ifft
 import scipy.ndimage.filters
 import scipy.stats as stats
-import cPickle as pickle
+import _pickle as pickle
 import gzip
 import os
 import subprocess
 import shutil
-import log
+from . import log
 import logging
 import copy
 import re
 
-from common import *
-from continuum import *
-from lines import *
-from spectrum import *
-from modeling.mpfitmodels import GaussianModel
-from modeling.mpfitmodels import VoigtModel
+from .common import *
+from .continuum import *
+from .lines import *
+from .spectrum import *
+from .modeling.mpfitmodels import GaussianModel
+from .modeling.mpfitmodels import VoigtModel
 
 
 
@@ -81,7 +81,7 @@ def __get_element(chemical_elements, molecules, species):
         # Symbol not found, maybe it is a molecule
         mfilter = (molecules['atomic_num'] == int(atomic_num))
         if len(molecules["symbol"][mfilter]) == 0:
-            print "WARNING: Discarding lines with atomic number", int(atomic_num)
+            print("WARNING: Discarding lines with atomic number", int(atomic_num))
             return "Discard"
         else:
             symbol = str(molecules["symbol"][mfilter][0])
@@ -476,8 +476,8 @@ def __fit_line(spectrum_slice, continuum_model, mu, sig=None, A=None, gamma=None
                 discard_gaussian = False
             except Exception as e:
                 pass
-                #if len(e.message) > 0:
-                    #print e.message
+                #if len(e.msg) > 0:
+                    #print e.msg
 
     if not discard_voigt:
         # Default values for failed fit:
@@ -495,8 +495,8 @@ def __fit_line(spectrum_slice, continuum_model, mu, sig=None, A=None, gamma=None
                 discard_voigt = False
             except Exception as e:
                 pass
-                #if len(e.message) > 0:
-                    #print e.message
+                #if len(e.msg) > 0:
+                    #print e.msg
 
     if (not discard_gaussian and not discard_voigt and rms_gaussian <= rms_voigt) or (not discard_gaussian and discard_voigt):
         return gaussian_model, rms_gaussian
@@ -1417,7 +1417,7 @@ def fit_lines(regions, spectrum, continuum_model, atomic_linelist, max_atomic_wa
                 # RMS
                 regions['rms'][i] = rms
             except Exception as e:
-                #print "WARNING: Bad line fit (", i, ") - ", e.message
+                #print "WARNING: Bad line fit (", i, ") - ", e.msg
                 fitting_not_possible = True
 
 
@@ -1530,9 +1530,9 @@ def __fill_linemasks_with_atomic_data(linemasks, atomic_linelist, diff_limit=0.0
     min_wave_peak = np.min(clean_linemasks['wave_peak'])
 
     if atomic_linelist['wave_nm'][0] > min_wave_peak or atomic_linelist['wave_nm'][-1] < max_wave_peak:
-        print "WARNING: The atomic linelist does not cover the whole linemask wavelength range"
-        print "- Atomic line's range from", atomic_linelist['wave_nm'][0], "to", atomic_linelist['wave_nm'][-1], "nm"
-        print "- Linemask range from", min_wave_peak, "to", max_wave_peak, "nm"
+        print("WARNING: The atomic linelist does not cover the whole linemask wavelength range")
+        print("- Atomic line's range from", atomic_linelist['wave_nm'][0], "to", atomic_linelist['wave_nm'][-1], "nm")
+        print("- Linemask range from", min_wave_peak, "to", max_wave_peak, "nm")
 
     wfilter = (atomic_linelist['wave_nm'] >= min_wave_peak - diff_limit) & (atomic_linelist['wave_nm'] <= max_wave_peak + diff_limit)
     atomic_linelist = atomic_linelist[wfilter]
@@ -1584,7 +1584,7 @@ def __find_peaks_and_base_points(xcoord, yvalues):
     """
     if len(yvalues[~np.isnan(yvalues)]) == 0 or len(yvalues[~np.isnan(xcoord)]) == 0:
         #raise Exception("Not enough data for finding peaks and base points")
-        print "WARNING: Not enough data for finding peaks and base points"
+        print("WARNING: Not enough data for finding peaks and base points")
         peaks = []
         base_points = []
     else:
@@ -2043,9 +2043,9 @@ try:
     pyximport.install(setup_args={'include_dirs':[np.get_include()]})
     from lines_c import create_mask as __create_mask
 except:
-    print "*********************************************************************"
-    print "Not optimized version loaded!"
-    print "*********************************************************************"
+    print("*********************************************************************")
+    print("Not optimized version loaded!")
+    print("*********************************************************************")
 
     def __create_mask(spectrum_wave, mask_wave, mask_values, velocity_mask_size=2.0):
         """
@@ -2064,7 +2064,7 @@ except:
 
         i = 0
         j = 0
-        for i in xrange(len(mask_wave)):
+        for i in range(len(mask_wave)):
             #j = 0
             while j < len(spectrum_wave) and spectrum_wave[j] < mask_wave_base[i]:
                 j += 1
@@ -2128,9 +2128,9 @@ def __select_lines_for_mask(linemasks, minimum_depth=0.01, velocity_mask_size = 
                 #print "*",
                 if i + 1 != l and i - 1 != r:
                     #print "both", i, i - l, r - i
-                    for x in xrange(r - i):
+                    for x in range(r - i):
                         selected[i+x] = False
-                    for x in xrange(i - l):
+                    for x in range(i - l):
                         selected[i-x] = False
                     if max_depth_l > max_depth_r:
                         selected[max_l] = True
@@ -2138,12 +2138,12 @@ def __select_lines_for_mask(linemasks, minimum_depth=0.01, velocity_mask_size = 
                         selected[max_r] = True
                 elif i + 1 != l:
                     #print "left"
-                    for x in xrange(i - l):
+                    for x in range(i - l):
                         selected[i-x] = False
                     selected[max_l] = True
                 else:
                     #print "right"
-                    for x in xrange(r - i):
+                    for x in range(r - i):
                         selected[i+x] = False
                     selected[max_r] = True
                 i = r
@@ -2454,8 +2454,8 @@ def __model_velocity_profile(ccf, nbins, only_one_peak=False, peak_probability=0
             final_model.set_emu(error)
             logging.info("Peak found at %.2f km/s (fitted at %.2f +/- %.2f km/s)" % (xcoord[peaks[i]], final_model.mu(), final_model.emu()))
             models.append(final_model)
-        except Exception, e:
-            print type(e), e.message
+        except Exception as e:
+            print(type(e), e.args)
 
 
     return np.asarray(models)
@@ -2522,7 +2522,7 @@ def select_good_velocity_profile_models(models, ccf):
     #spectrum['flux'] /= continuum_model(spectrum['waveobs'])
     #linemasks = linemasks.copy()
     #diff = []
-    #for i in xrange(len(linemasks)):
+    #for i in range(len(linemasks)):
         #line_region = linemasks[i:i+1]
         #wfilter = spectrum['waveobs'] >= line_region['wave_base'] - margin
         #wfilter = np.logical_and(wfilter, spectrum['waveobs'] <= line_region['wave_base'] + margin)
@@ -2654,7 +2654,7 @@ def __synthe_write_atomic_linelist(linelist, linelist_filename=None, tmp_dir=Non
         iwidth_species = map(int, map(float, linelist[molecules]['width_species']))
         unique_iwidth_species = np.unique(iwidth_species)
         nfiles = len(unique_iwidth_species)
-        for i in xrange(nfiles):
+        for i in range(nfiles):
             molecules_out.append(tempfile.NamedTemporaryFile(delete=False, dir=tmp_dir))
 
     for line in linelist[~molecules]:
@@ -2841,7 +2841,7 @@ def update_ew_with_ares(spectrum, linelist, rejt="0.995", tmp_dir=None, verbose=
             # If there is only one line, do a list or this function will fail
             data = (data,)
     except:
-        print out
+        print(out)
         sys.stdout.flush()
         raise Exception("ARES failed!")
 

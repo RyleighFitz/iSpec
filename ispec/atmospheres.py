@@ -22,8 +22,8 @@ from subprocess import Popen, PIPE
 import math
 from datetime import datetime
 import tempfile
-import cPickle as pickle
-import log
+import _pickle as pickle
+from . import log
 import logging
 import subprocess
 import shutil
@@ -32,7 +32,7 @@ from astropy.io import fits
 from scipy import spatial
 from scipy.interpolate import LinearNDInterpolator
 import glob
-from common import is_turbospectrum_support_enabled, is_spectrum_support_enabled
+from .common import is_turbospectrum_support_enabled, is_spectrum_support_enabled
 
 # SPECTRUM is compatible only with the plane-parallel atmospheres.
 # The first layer represents the surface.
@@ -343,8 +343,10 @@ def load_modeled_layers_pack(input_path):
     # But first verify that the computed one (if exists) matches what is expected
     use_dump = False
     if os.path.exists(cache_filename):
+        print(cache_filename)
         use_dump = True
-        delaunay_triangulations, kdtree = pickle.load(open(cache_filename, 'rb'))
+        #delaunay_triangulations, kdtree = pickle.load(open(cache_filename, 'rb'))
+        delaunay_triangulations, kdtree = np.load(open(cache_filename, 'rb'))
         for delaunay_triangulation, parameters_subset in zip(delaunay_triangulations['precomputed'], parameters_subsets):
             if delaunay_triangulation is None:
                 continue

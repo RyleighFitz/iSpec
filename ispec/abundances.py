@@ -16,17 +16,17 @@
 #    along with iSpec. If not, see <http://www.gnu.org/licenses/>.
 #
 import numpy as np
-from atmospheres import *
-from lines import write_atomic_linelist
-from common import is_turbospectrum_support_enabled, is_spectrum_support_enabled, is_moog_support_enabled, is_width_support_enabled
+from .atmospheres import *
+from .lines import write_atomic_linelist
+from .common import is_turbospectrum_support_enabled, is_spectrum_support_enabled, is_moog_support_enabled, is_width_support_enabled
 from multiprocessing import Process
 from multiprocessing import Queue
 from multiprocessing import JoinableQueue
-from Queue import Empty
+from queue import Empty
 import subprocess
 import shutil
 
-import log
+from . import log
 import logging
 import re
 
@@ -294,7 +294,7 @@ def determine_abundances(atmosphere_layers, teff, logg, MH, alpha, linemasks, ab
                 else:
                     filtered_ignore = None
                 spec_abund, absolute_abund, x_over_h, x_over_fe = __moog_determine_abundances(atmosphere_layers, teff, logg, MH, alpha, linemasks[~bad], isotopes, abundances, microturbulence_vel = microturbulence_vel, ignore=filtered_ignore, verbose=verbose, tmp_dir=tmp_dir)
-            except Exception, e:
+            except Exception as e:
                 # MOOG ERROR: CANNOT DECIDE ON LINE WAVELENGTH STEP SIZE FOR   5158.62   I QUIT!
                 if "CANNOT DECIDE ON LINE WAVELENGTH STEP SIZE FOR" in str(e):
                     logging.error(str(e))
@@ -328,7 +328,7 @@ def determine_abundances(atmosphere_layers, teff, logg, MH, alpha, linemasks, ab
                 else:
                     filtered_ignore = None
                 spec_abund, absolute_abund, x_over_h, x_over_fe =  __width_determine_abundances(atmosphere_layers, teff, logg, MH, alpha, linemasks[~bad], isotopes, abundances, microturbulence_vel = microturbulence_vel, ignore=filtered_ignore, verbose=verbose, tmp_dir=tmp_dir)
-            except Exception, e:
+            except Exception as e:
                 # WIDTH ERROR: 515.8551 -2.379  3.5  108707.400  2.0*********************01
                 if "WIDTH ERROR:" in str(e):
                     logging.warn("Re-executing WIDTH without the problematic line (it is recommended to manually remove that line to improve execution time)")

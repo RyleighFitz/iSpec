@@ -16,7 +16,7 @@
 #    along with iSpec. If not, see <http://www.gnu.org/licenses/>.
 #
 import numpy as np
-import log
+from . import log
 import logging
 
 def read_segment_regions(segment_regions_filename):

@@ -27,9 +27,9 @@ import os, errno
 #import ipdb
 import random
 import sys
-import log
+from . import log
 import logging
-import cPickle as pickle
+import _pickle as pickle
 import gzip
 
 def is_spectrum_support_enabled():
@@ -343,9 +343,9 @@ try:
     from common_c import find_local_max_values
     from common_c import find_local_min_values
 except:
-    print "*********************************************************************"
-    print "Not optimized version loaded!"
-    print "*********************************************************************"
+    print("*********************************************************************")
+    print("Not optimized version loaded!")
+    print("*********************************************************************")
 
     def find_local_max_values(x):
         """

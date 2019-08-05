@@ -19,14 +19,14 @@ import numpy as np
 import numpy.lib.recfunctions as rfn # Extra functions
 from astropy.io import fits as pyfits
 import scipy.ndimage as ndi
-from spectrum import *
-from common import *
+#from spectrum import * #Self reference?
+from .common import *
 from scipy import interpolate
 import time
-import log
+from . import log
 import logging
 try:
-    from plotting import *
+    from .plotting import *
 except:
     logging.warn("Plotting could not be loaded!")
     pass
@@ -102,7 +102,7 @@ def __read_fits_spectrum(spectrum_filename):
                 # Angstrom to nm
                 if unit != "nm":
                     waveobs /= 10
-                print "Log scale"
+                print("Log scale")
             else:
                 # Angstrom to nm
                 if unit != "nm":
@@ -485,10 +485,10 @@ try:
     from spectrum_c import convolve_spectrum as __convolve_spectrum
     from spectrum_c import interpolation as __interpolation
 except:
-    print "*********************************************************************"
-    print "Not optimized version loaded!"
-    print "*********************************************************************"
-
+    print("*********************************************************************")
+    print("Not optimized version loaded!")
+    print("*********************************************************************")
+    
     def __interpolation(waveobs, fluxes, err, resampled_waveobs, bessel=False, zero_edges=True, frame=None):
         """
         Interpolate flux for a given wavelength by using Bessel's Central-Difference Interpolation.
